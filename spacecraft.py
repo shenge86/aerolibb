@@ -6,13 +6,15 @@ class spacecraft:
 	# class variables shared by all instances
 	
 
-	def __init__(self, name, mass=1000, vol=1000, cost=1000, x=0, y=0, z=0, yaw=0, pitch=0, roll=0):
+	def __init__(self, name, type, mass=1000, vol=1000, power=100, cost=1000, x=0, y=0, z=0, yaw=0, pitch=0, roll=0):
 		''' Constructor for the class '''
 		# create instance variable unique to each instance
 		# initialize
 		self.name = name
+		self.type = type
 		self.mass = mass
 		self.vol = vol
+		self.power = power
 		self.cost = cost
 		self.x = x # position in current frame
 		self.y = y
@@ -24,13 +26,20 @@ class spacecraft:
 	
 	def printDesc(self):
 		print("Spacecraft state: ")
-		print(self.name)
-		print(self.mass)
-		print(self.vol)
-		print(self.cost)
-		print("Current position (xyz): [%f %f %f]" % (self.x, self.y, self.z))
+		print("Name: " + self.name)
+		print("Type: " + str(self.type))
+		print("OPTIONS: ")
+		print("Type 1: Communications")
+		print("Type 2: Meteorology")
+		print("Type 3: Planetary")
+		print("Type 4: Other")
+		print("Mass (kg): " + str(self.mass))
+		print("Volume (m^3): " + str(self.vol))
+		print("Power (W): " + str(self.power))
+		print("Cost ($): " + str(self.cost))
+		print("Current position (xyz) (km): [%f %f %f]" % (self.x, self.y, self.z))
 		print(self.rp)
-		print("Current attitude (ypr): [%f %f %f]" % (self.yaw, self.pitch, self.roll))
+		print("Current attitude (ypr) (rad): [%f %f %f]" % (self.yaw, self.pitch, self.roll))
 	
 	# Orbital Functions
 	def definePosition(self, x, y, z, *rp):
@@ -63,10 +72,24 @@ class spacecraft:
 		print(self.rp)
 		return rp
 	
-	# Mass Functions
-	def payload_mass(self, mp):
-		self.mp = mp
-		return self.mp
+	# Payload Functions
+	def definePayload(self, mpayload, ppayload):
+		self.mpayload = mpayload
+		self.ppayload = ppayload
+		if self.type == 1:
+			power = 1.1568*ppayload + 55.497
+		elif self.type == 2:
+			power = 602.18 * np.log(ppayload) - 2761.4
+		elif self.type == 3:
+			power = 332.93 * np.log(ppayload) - 1046.6
+		else:
+			power = 210 + 1.3*ppayload
+		
+		self.power = power
+		
+		mass = mpayload * 2
+		self.mass = mass
+		return mass, power
 	
 	# Test Functions
 	def test(self):
