@@ -30,7 +30,7 @@ mi = 50000
 # print(rs)
 
 # Test #
-sc = spacecraft.spacecraft('lunarcraft',1000,1000,1000)
+sc = spacecraft.spacecraft('lunarcraft',1, 1000,1000,1000)
 sc.printDesc()
 rp = sc.definePosition(1,1,1)
 print("INITIAL CONFIG:")
@@ -43,3 +43,12 @@ rp = sc.rotateAttitude(0,0,np.pi/4)
 print("FINAL CONFIG:")
 print("Positions are now defined relative to new frame.")
 sc.printDesc()
+
+#
+print("Power Test: ")
+sc.definePayload(100,1000)
+sc.printDesc()
+
+
+# sc2 = spacecraft.spacecraft('suncraft',1000,1000,1000)
+# sc2.printDesc()
