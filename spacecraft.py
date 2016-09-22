@@ -23,6 +23,8 @@ class spacecraft:
 		self.yaw = yaw # current frame's axis displayed as rotations relative to inertial frame
 		self.pitch = pitch
 		self.roll = roll
+		# initialize subsystems with default parameters
+		self.engine = prop.engine("Engine 1", "LH2/LOX", 110, 5000, 505, 100, 300, 350) # main engine
 	
 	def printDesc(self):
 		print("Spacecraft state: ")
@@ -40,6 +42,17 @@ class spacecraft:
 		print("Current position (xyz) (km): [%f %f %f]" % (self.x, self.y, self.z))
 		print(self.rp)
 		print("Current attitude (ypr) (rad): [%f %f %f]" % (self.yaw, self.pitch, self.roll))
+	
+	# recalculate parameters
+	def recalcMass(self):
+		''' Add up masses of all subsystems '''
+		# self.mass = 
+		return self.mass
+	
+	# General subsystems create
+	def createEngine(self, name="Just Another Engine", type="Xe Hall Thruster", isp=5000):
+		return prop.engine(name, type, 11, 500, 50, 10, 30, isp)
+		
 	
 	# Orbital Functions
 	def definePosition(self, x, y, z, *rp):

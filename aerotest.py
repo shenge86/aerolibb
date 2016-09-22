@@ -49,6 +49,18 @@ print("Power Test: ")
 sc.definePayload(100,1000)
 sc.printDesc()
 
+#
+print("Engine Test: ")
+sc.engine.name = "Unknown"
+sc.engine.propellantTank(sc.engine.massp)
+sc.engine.printDesc()
+
+sc.engine2 = sc.createEngine("BX2T", "Ion",6000)
+sc.engine2.printDesc()
+
+sc.engine3 = sc.createEngine()
+sc.engine3.printDesc()
+
 
 # sc2 = spacecraft.spacecraft('suncraft',1000,1000,1000)
-# sc2.printDesc()
+# sc2.engine.printDesc()
