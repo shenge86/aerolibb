@@ -1,6 +1,6 @@
 import numpy as np
 
-class engine: 
+class Engine: 
 	def __init__(self, name, type, masse, massp, masss, size, thrust, isp):
 		self.name = name
 		self.type = type
@@ -15,6 +15,7 @@ class engine:
 		print ("Propulsion/Engine Information")
 		print("Name: " + self.name)
 		print("Type: " + self.type)
+		print("Mass of engine: " + str(self.masse))
 		print("Mass of propellant: " + str(self.massp))
 		print("Mass of tanks: " + str(self.masss))
 		mass = self.masse + self.massp + self.masss
@@ -37,7 +38,7 @@ class engine:
 		self.mass = mf
 		return mf, mp
 		
-	def propellantTank(self, massp):
+	def propellant_tank(self, massp):
 		'''
 		Takes in the mass of the propellant to calculate tank mass
 		'''

@@ -1,8 +1,9 @@
 import propulsion as prop
+import power as pow
 import framechange as fc
 import numpy as np
 
-class spacecraft:
+class Spacecraft:
 	# class variables shared by all instances
 	
 
@@ -24,7 +25,7 @@ class spacecraft:
 		self.pitch = pitch
 		self.roll = roll
 		# initialize subsystems with default parameters
-		self.engine = prop.engine("Engine 1", "LH2/LOX", 110, 5000, 505, 100, 300, 350) # main engine
+		self.engine = prop.Engine("Engine 1", "LH2/LOX", 110, 5000, 505, 100, 300, 350) # main engine		
 	
 	def printDesc(self):
 		print("Spacecraft state: ")
@@ -44,18 +45,20 @@ class spacecraft:
 		print("Current attitude (ypr) (rad): [%f %f %f]" % (self.yaw, self.pitch, self.roll))
 	
 	# recalculate parameters
-	def recalcMass(self):
+	def recalc_mass(self):
 		''' Add up masses of all subsystems '''
 		# self.mass = 
 		return self.mass
 	
 	# General subsystems create
-	def createEngine(self, name="Just Another Engine", type="Xe Hall Thruster", isp=5000):
-		return prop.engine(name, type, 11, 500, 50, 10, 30, isp)
+	def create_engine(self, name="Just Another Engine", type="Xe Hall Thruster", masse=11, massp=500, masss=50, size=10, thrust=30, isp=5000):
+		return prop.Engine(name, type, masse, massp, masss, size, thrust, isp)
 		
+	def create_solar(self, name="Just Another Solar Panel", size=5000, mass=5, powerlab=300, efficiency=0.15):
+		return pow.Solar(name, size, mass, powerlab, efficiency)
 	
 	# Orbital Functions
-	def definePosition(self, x, y, z, *rp):
+	def define_position(self, x, y, z, *rp):
 		self.x = x
 		self.y = y
 		self.z = z
@@ -63,14 +66,16 @@ class spacecraft:
 		return rp
 	
 	# Attitude Functions
-	def defineAttitude(self,yaw,pitch,roll):
+	def define_attitude(self,yaw,pitch,roll):
 		self.yaw = yaw
 		self.pitch = pitch
 		self.roll = roll
 		return yaw, pitch, roll
 	
-	def rotateAttitude(self,yaw,pitch,roll, *rp):
-	# point location in new coordinate frame
+	def rotate_attitude(self,yaw,pitch,roll, *rp):
+		''' Locate the point in a rotated coordinate frame 
+		rp is optional since you will already know rp from x, y, and z coordinates
+		but you can redefine another rp if you would like '''
 		self.yaw = yaw
 		self.pitch = pitch
 		self.roll = roll
@@ -86,7 +91,7 @@ class spacecraft:
 		return rp
 	
 	# Payload Functions
-	def definePayload(self, mpayload, ppayload):
+	def define_payload(self, mpayload, ppayload):
 		self.mpayload = mpayload
 		self.ppayload = ppayload
 		if self.type == 1:
