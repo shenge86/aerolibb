@@ -79,7 +79,7 @@ class Spacecraft:
 		self.yaw = yaw
 		self.pitch = pitch
 		self.roll = roll
-		rotMatrix = fc.euler(yaw,pitch,roll)
+		rotMatrix = fc.euler2dcm(yaw,pitch,roll)
 		print(rotMatrix)
 		print(self.rp)
 		print("Coordinates in rotated frame: ")
