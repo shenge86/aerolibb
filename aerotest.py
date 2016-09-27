@@ -4,18 +4,11 @@ import sys
 # Change path depending on your own system
 sys.path.insert(0, r"C:\Users\sheng\Dropbox\SG\Python\LIBRARIES\aerolibb") #the directory that contains my_pkg
 import numpy as np
-# from aerolibb import propulsion
 from aerolibb import framechange as fc
+from aerolibb import propulsion as prop
 from aerolibb import spacecraft
-# propulsion as aero
 
-deltav = 3000
-isp = 350
-mi = 50000
-# (mf, mp) = propulsion.rocketeqn(deltav, isp, mi)
 
-# print(mf)
-# print(mp)
 
 # framechange test
 DCM = np.matrix([[-0.0614637, 0.3985394, -0.9150894],[-0.7304249, 0.6068640, 0.3133615],[0.6802215, 0.6876644, 0.2538028]])
@@ -46,7 +39,14 @@ print(rpnew)
 # rs = np.dot(rotMatrix, rp)
 # print(rs)
 
-
+# propulsion test
+engine1 = prop.Engine("Engine 1", "LH2/LOX", 110, 5000, 505, 100, 300, 350) 
+deltav = 3000
+mi = 50000
+mf = 200
+mp = 40000
+# engine1.rocketeqn(deltav, mi, mf, mp)
+deltav, mi, mf, mp = engine1.rocketeqn(mf=100, mi=1000)
 
 
 # Test  SPACECRAFT#

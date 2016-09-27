@@ -24,19 +24,58 @@ class Engine:
 		print("Thrust: " + str(self.thrust))
 		print("isp: " + str(self.isp))	
 		
-	def rocketeqn(self, deltav, isp, mi):
+	def rocketeqn(self, **kwargs):
 		"""
-		Find final mass and propellant mass from iniitial mass
+		Inputs can be in any order but must be named as such: 
+		deltav (change in velocity)
+		mi (initial mass)
+		mf (final mass)
+		mp (propellant mass)
+		From known parameters, calculates other parameters.
 		"""
-		g = 9.80665
-		# mp = mi*(1 - np.exp(-deltav / (g*isp)))
-		# mf = mi - mp
-		mf = mi * np.exp(-deltav / (isp*g))
-		mp = mi - mf
+		# constants
+		g = 9.80665 # m/s^2
+		# isp is specific to the engine so it cannot be changed
+		isp = self.isp # s 
 		
-		# recalculate necessary engine mass
-		self.mass = mf
-		return mf, mp
+		def selfset(self):
+			self.deltav = deltav
+			self.mi = mi
+			self.mf= mf
+			self.mp = mp
+			print("Calculated / Given Values: ")
+			print("With an engine that has an isp of " + str(isp) + ": ")
+			print("deltav: " + str(deltav))
+			print("mi (initial mass): " + str(mi))
+			print("mf (final mass): " + str(mf))
+			print("mp (propellant mass): " + str(mp))
+		
+		if "deltav" in kwargs and "mi" in kwargs:
+			print("Given deltav: " + str(kwargs["deltav"]))
+			deltav = kwargs["deltav"]
+			mi = kwargs["mi"]
+			mp = mi * (1 - np.exp(-deltav / (g * isp)))
+			mf = mi - mp
+			selfset(self)
+			return deltav, mi, mf, mp
+		
+		if "deltav" in kwargs and "mf" in kwargs:
+			deltav = kwargs["deltav"]
+			mf = kwargs["mf"]
+			mp = mf * (np.exp(deltav / (g*isp)) - 1)
+			mi = mp + mf
+			selfset(self)
+			return deltav, mi, mf, mp
+			
+		if "mi" in kwargs and "mf" in kwargs:	
+			print("Given mi: " + str(kwargs["mi"]))
+			print("Given mf: " + str(kwargs["mf"]))
+			mi = kwargs["mi"]
+			mf = kwargs["mf"]
+			deltav = g * isp * np.log(mi / mf)
+			mp = mi - mf
+			selfset(self)
+			return deltav, mi, mf, mp
 		
 	def propellant_tank(self, massp):
 		'''
