@@ -40,7 +40,7 @@ print(rpnew)
 # print(rs)
 
 # propulsion test
-engine1 = prop.Engine("Engine 1", "LH2/LOX", 110, 5000, 505, 100, 300, 350) 
+engine1 = prop.Engine("Engine 1", "LH2/LOX", 110, 5000, 505, 100, thrust=.889, isp=150) 
 deltav = 3000
 mi = 50000
 mf = 200
@@ -48,6 +48,9 @@ mp = 40000
 # engine1.rocketeqn(deltav, mi, mf, mp)
 deltav, mi, mf, mp = engine1.rocketeqn(mf=100, mi=1000)
 
+engine1.oneaxismaneuver(np.pi/2, 500, 1.8, 2)
+
+engine1.unloadrxn(27, 418.879, 2.134, 2)
 
 # Test  SPACECRAFT#
 '''
