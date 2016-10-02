@@ -5,22 +5,18 @@ class Engine:
 	global g 
 	g = 9.80665 # m/s^2
 	
-	def __init__(self, name, type, masse, massp, masss, size, thrust, isp):
+	def __init__(self, name, type, thrust, isp):
 		''' Defines major characteristics of an engine 
 		Type of engine affects major design calculations.
 		Specifics such as the type of chemicals do not need to be defined.
 		Type can be the following:
-		Mono (monopropellant)
-		Biprop (bipropellant)
-		Coldgas (cold gas)
-		Solid (solid)
+			Mono or 1 (monopropellant)
+			Biprop or 2 (bipropellant)
+			Coldgas or 3 (cold gas)
+			Solid or 4 (solid)
 		'''
 		self.name = name
 		self.type = type
-		self.masse = masse # mass of engine
-		self.massp = massp # mass of propellant
-		self.masss = masss # mass of tanks and structure
-		self.size = size
 		self.thrust = thrust
 		self.isp = isp
 		
@@ -39,6 +35,8 @@ class Engine:
 		print("Thrust: " + str(self.thrust))
 		print("isp: " + str(self.isp))	
 		
+	# orbital mechanics
+	
 	def rocketeqn(self, **kwargs):
 		"""
 		Rocket equation
@@ -56,10 +54,11 @@ class Engine:
 		isp = self.isp # s 
 		
 		def selfset(self):
+			# Define a set of masses for the propulsion system 
 			self.deltav = deltav
-			self.mi = mi
-			self.mf= mf
-			self.mp = mp
+			self.mi = mi # initial mass`
+			self.mf= mf # final mass
+			self.mp = mp # propellant mass
 			print("Calculated / Given Values: ")
 			print("With an engine that has an isp of " + str(isp) + ": ")
 			print("deltav: " + str(deltav))
@@ -126,7 +125,7 @@ class Engine:
 		Reaction wheel has spun to the maximum speed. Now, we need to de-spin it to 0 with thrusters firing the opposite direction.
 		Answers the question: What is the amount of propellant needed to reset the wheel rotation speed to 0?
 		Note also that this does not modify the mass of propellant needed for the engine!!! You need to do that separately.
-		'Inputs:
+		Inputs:
 			Iw (moment of inertia of the reaction wheel in kg*m^2 about the x, y, or z axis)
 			omega (angular velocity of the reaction wheel in rad / s )
 			L (moment arm in m - distance from center of mass to the thruster)
@@ -143,14 +142,64 @@ class Engine:
 	
 	# Structure
 	
-	def tankmass2vol(rho, r, t)
+	def calcpropsystemvol(self, B, rhop, I, rb):
+		''' Scenario:
+		Assume the engine isp, thrust, and type is known from defined parameters in creation.
+		Assume spherical tank.
+		Now also take in 
+		Inputs:
+			B (blowdown ratio)
+			rhop (density of propellant kg/m**3)
+			I (impulse N * s)
+		Outputs:
+			Wt (mass of engine)
+			mp (mass of propellant)
+			
+		'''
+		if self.type == "Mono" || self.type == 1:
+			T = self.thrust
+			isp = self.isp
+			# thruster weight (kg)
+			Wt = 0.4 + 0.0033 * T
+			
+			# usable propellant weight
+			Wu = I / (isp * g)
+			
+			# calculate total volume of propellant to determine tank size (and mass) needed #
+			# volume of usable propellant
+			Vu = Wu / rhop
+			# total volume of unusable propellant is ~3% of useable for monopropellant system
+			Vp = Vu / .03 
+			
+			# ullage volume
+			Vgi = Vu / (B - 1)
+			
+			# bladder volume
+			# assume thin shell approximation
+			tb = .02 # thickness of bladder
+			rb = (0.75 * (Vp + Vgi) / np.pi) ** (1/3)
+			Ab = 2 * np.pi * r**2
+			Vb = Ab * tb
+		else:
+			print("Not an accepted type of propulsion.")
+		
+		mpropsys = Wt + Wu
+		vpropsys = Vu + Vp + Vgi + Vb
+		return Wt, Wu, Vu, Vp, Vgi, Vb
+	
+	def tankvol2mass(self, rho, r, tl, shape="sphere"):
 		''' From known volume of tank, finds the mass.
 		Inputs:
 		rho (density of tank material in kg/m3)
 		r (internal radius of tank in m)
-		t (thickness of tank wall in m)
+		tl (thickness of tank wall if sphere or length of tank if cylinder (both in m))
+		shape (spherical or cylindrical)
 		'''
-		R = r + t
-		masss = (4/3) * np.pi * rho * (R**3 - r**3)
+		if shape == "sphere":
+			R = r + tl
+			masss = (4/3) * np.pi * rho * (R**3 - r**3)
+		else # assume cylindrical
+			masss = np.pi * tl * rho * (R**2 - r**2)
+		
 		self.masss = masss
 		return masss
