@@ -24,11 +24,9 @@ class Spacecraft:
 		self.yaw = yaw # current frame's axis displayed as rotations relative to inertial frame
 		self.pitch = pitch
 		self.roll = roll
-		# initialize subsystems with default parameters
-		self.engine = prop.Engine("Engine 1", "LH2/LOX", 110, 5000, 505, 100, 300, 350) # main engine		
 	
 	def printDesc(self):
-		print("Spacecraft state: ")
+		print("Spacecraft Overview: ")
 		print("Name: " + self.name)
 		print("Type: " + str(self.type))
 		print("OPTIONS: ")
@@ -47,12 +45,11 @@ class Spacecraft:
 	# recalculate parameters
 	def recalc_mass(self):
 		''' Add up masses of all subsystems '''
-		# self.mass = 
 		return self.mass
 	
 	# General subsystems create
-	def create_engine(self, name="Just Another Engine", type="Xe Hall Thruster", masse=11, massp=500, masss=50, size=10, thrust=30, isp=5000):
-		return prop.Engine(name, type, masse, massp, masss, size, thrust, isp)
+	def create_engine(self, name="Hydrazine Thruster", type="Mono", thrust=3000, isp=275, masse=1000):
+		return prop.Engine(name, type, thrust, isp, masse)
 		
 	def create_solar(self, name="Just Another Solar Panel", size=5000, mass=5, powerlab=300, efficiency=0.15):
 		return pow.Solar(name, size, mass, powerlab, efficiency)

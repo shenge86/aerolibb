@@ -1,37 +1,42 @@
 import numpy as np
 
-class Engine: 
+class Engine(object): 
 	# Constants
+	instances = [] # spacecraft can have multiple engines so need to keep track of number of instances of this class 
 	global g 
 	g = 9.80665 # m/s^2
 	
-	def __init__(self, name, type, thrust, isp):
+	def __init__(self, name, type, thrust, isp, me):
 		''' Defines major characteristics of an engine 
 		Type of engine affects major design calculations.
 		Specifics such as the type of chemicals do not need to be defined.
-		Type can be the following:
-			Mono or 1 (monopropellant)
-			Biprop or 2 (bipropellant)
-			Coldgas or 3 (cold gas)
-			Solid or 4 (solid)
+		INPUTS:
+			Name can be anything.
+			Type can be the following:
+				Mono or 1 (monopropellant)
+				Biprop or 2 (bipropellant)
+				Coldgas or 3 (cold gas)
+				Solid or 4 (solid)
+			Thrust is in Newtons.
+			isp is in seconds.
+			Me is engine mass without propellant or tanks in kg.
 		'''
 		self.name = name
 		self.type = type
 		self.thrust = thrust
 		self.isp = isp
-		
-		
+		self.me = me
+		Engine.instances.append(self)
 
 	def printDesc(self):
 		print ("Propulsion/Engine Information")
 		print("Name: " + self.name)
 		print("Type: " + self.type)
-		print("Mass of engine: " + str(self.masse))
-		print("Mass of propellant: " + str(self.massp))
-		print("Mass of tanks: " + str(self.masss))
-		mass = self.masse + self.massp + self.masss
-		print("Total Mass: " + str(mass))
-		print("Size: " + str(self.size))
+		print("Mass of engine: " + str(self.me))
+		print("Mass of propellant: " + str(self.mp))
+		print("Mass of other: " + str(self.mo))
+		self.mass = self.me + self.mp + self.mo
+		print("Total Mass: " + str(self.mass))
 		print("Thrust: " + str(self.thrust))
 		print("isp: " + str(self.isp))	
 		
@@ -153,14 +158,16 @@ class Engine:
 			I (impulse N * s)
 		Outputs:
 			Wt (mass of engine)
-			mp (mass of propellant)
-			
+			mp (mass of propellant)			
 		'''
-		if self.type == "Mono" || self.type == 1:
+		if self.type == "Mono" or self.type == 1:
 			T = self.thrust
 			isp = self.isp
 			# thruster weight (kg)
-			Wt = 0.4 + 0.0033 * T
+			Wt = self.me
+			# Use only if you don't know thruster weight:
+			# Wt = 0.4 + 0.0033 * T
+			# self.masse = Wt
 			
 			# usable propellant weight
 			Wu = I / (isp * g)
@@ -185,7 +192,7 @@ class Engine:
 		
 		mpropsys = Wt + Wu
 		vpropsys = Vu + Vp + Vgi + Vb
-		return Wt, Wu, Vu, Vp, Vgi, Vb
+		return mpropsys, vpropsys
 	
 	def tankvol2mass(self, rho, r, tl, shape="sphere"):
 		''' From known volume of tank, finds the mass.
@@ -197,9 +204,10 @@ class Engine:
 		'''
 		if shape == "sphere":
 			R = r + tl
-			masss = (4/3) * np.pi * rho * (R**3 - r**3)
-		else # assume cylindrical
-			masss = np.pi * tl * rho * (R**2 - r**2)
+			mtank = (4/3) * np.pi * rho * (R**3 - r**3)
+		else: # assume cylindrical
+			mtank = np.pi * tl * rho * (R**2 - r**2)
 		
-		self.masss = masss
-		return masss
+		mo = mtank
+		self.mo = mo
+		return mo

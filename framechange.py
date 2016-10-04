@@ -1,5 +1,5 @@
 import numpy as np
-'''Functions useful for reference frame'''
+'''Functions useful for reference frame changes'''
 
 def euler2dcm(psi, theta, phi):
 # yaw-pitch-roll angles aka Tait-Bryan angles
@@ -67,10 +67,58 @@ def q2dcm(q):
 	return DCM
 	
 def rotate(q, r):
-	'''Define vector in another coordinate system
-	Input: 4-vector quarternion
-	Output: 3x1 position vector 
+	'''Define vector in another rectangular coordinate system
+	Input: 
+		4x1 quarternion
+	Output: 
+		3x1 position vector 
 	'''
 	DCM = q2dcm(q)
-	rnew = DCM*r
+	# rpnew = np.dot(DCM,rp)
+	rnew = DCM * r
 	return rnew
+
+def rotateDCM(DCM, r):
+	'''Define vector in another rectangular coordinate system
+	Input:
+		3x3 DCM matrix
+	Output:
+		3x1 position vector
+	'''
+	rnew = DCM * r
+	return rnew
+	
+def rotate_sphe2rect(l, b, d):
+	''' Rotates input spherical coordinates to rectangular coordinates
+	Inputs;
+		l = longitude
+		b = latitutde
+		d = distance
+	Outputs:
+		r = [x, y, z] rectangular coordinates
+	'''
+	x = d * np.cos(b) * np.cos(l)
+	y = d * np.cos(b) * np.sin(l)
+	z = d * np.sin(b)
+	
+	r = np.array([[x, y, z]])
+	return r
+	
+def rotate_rect2sphe(r):
+	''' Rotates input rectangular coordinates to spherical coordinates
+	Inputs:
+		r = [x, y, z] rectangular coordinates
+	Outputs: 
+		l = longitude
+		b = latitutde
+		d = distance
+	'''
+	x = r.item(0)
+	y = r.item(1)
+	z = r.item(2)
+	
+	d = np.sqrt(x**2 + y**2 + z**2)
+	l = np.arctan2(y, x)
+	b = np.arcsin(z / d)
+	rsphere = np.array([[l, b, d]])
+	return rsphere

@@ -5,12 +5,36 @@ import sys
 sys.path.insert(0, r"C:\Users\sheng\Dropbox\SG\Python\LIBRARIES\aerolibb") #the directory that contains my_pkg
 import numpy as np
 from aerolibb import framechange as fc
-from aerolibb import propulsion as prop
+from aerolibb import propulsion as engine
 from aerolibb import spacecraft
 
+# create spacecraft
+sc = spacecraft.Spacecraft("Juno", "Interplanetary")
+
+# propulsion test
+print("STARTING PROPULSION TEST")
+sc.engine1 = sc.create_engine("Engine1", "Mono", thrust=.889, isp=150, masse=500) 
+deltav, mi, mf, mp = sc.engine1.rocketeqn(mf=100, mi=1000)
+sc.engine1.mo = 100
+sc.engine1.printDesc()
+
+print("Examine engine instances")
+# my_engines = []
+# for i in range(100):
+    # my_objects.append(engine(i))
+
+# # later
+# for obj in my_objects:
+    # print obj.type
+# foo_vars = {id(instance): instance.foo for instance in A.instances}
+
+# sc.engine1.oneaxismaneuver(np.pi/2, 500, 1.8, 2)
+
+# sc.engine1.unloadrxn(27, 418.879, 2.134, 2)
 
 
 # framechange test
+print("STARTING FRAME CHANGE TEST")
 DCM = np.matrix([[-0.0614637, 0.3985394, -0.9150894],[-0.7304249, 0.6068640, 0.3133615],[0.6802215, 0.6876644, 0.2538028]])
 q = fc.dcm2q(DCM)
 print(q)
@@ -21,8 +45,21 @@ DCM = fc.euler2dcm(psi, theta, phi)
 print(DCM)
 
 # rotate frame
-rp = np.array([[1],[2],[3]])
-rpnew = np.dot(DCM,rp)
+print("Rotating position vector frame test:")
+l = np.deg2rad(184.4152)
+b = np.deg2rad(1.2689)
+d = 5.45609173877203
+rp = fc.rotate_sphe2rect(l, b, d)
+print(rp)
+# rsphere = fc.rotate_rect2sphe(rp)
+# print(rsphere)
+
+# rp = np.array([[1],[2],[3]])
+print("Ready to rotate by Euler angles")
+rp = rp.T
+print(rp)
+
+rpnew = fc.rotateDCM(DCM,rp)
 print(rpnew)
 
 rpnew = fc.rotate(q,rp)
@@ -39,18 +76,9 @@ print(rpnew)
 # rs = np.dot(rotMatrix, rp)
 # print(rs)
 
-# propulsion test
-engine1 = prop.Engine("Engine 1", "LH2/LOX", 110, 5000, 505, 100, thrust=.889, isp=150) 
-deltav = 3000
-mi = 50000
-mf = 200
-mp = 40000
-# engine1.rocketeqn(deltav, mi, mf, mp)
-deltav, mi, mf, mp = engine1.rocketeqn(mf=100, mi=1000)
 
-engine1.oneaxismaneuver(np.pi/2, 500, 1.8, 2)
 
-engine1.unloadrxn(27, 418.879, 2.134, 2)
+
 
 # Test  SPACECRAFT#
 '''
