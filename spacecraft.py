@@ -4,8 +4,7 @@ import framechange as fc
 import numpy as np
 
 class Spacecraft:
-	# class variables shared by all instances
-	
+	# class variables shared by all instances	
 
 	def __init__(self, name, type, mass=1000, vol=1000, power=100, cost=1000, x=0, y=0, z=0, yaw=0, pitch=0, roll=0):
 		''' Constructor for the class '''
@@ -48,8 +47,8 @@ class Spacecraft:
 		return self.mass
 	
 	# General subsystems create
-	def create_engine(self, name="Hydrazine Thruster", type="Mono", thrust=3000, isp=275, masse=1000):
-		return prop.Engine(name, type, thrust, isp, masse)
+	def create_engine(self, name="Hydrazine Thruster", type="Mono", thrust=3000, isp=275, me=1000):
+		return prop.Engine(name, type, thrust, isp, me)
 		
 	def create_solar(self, name="Just Another Solar Panel", size=5000, mass=5, powerlab=300, efficiency=0.15):
 		return pow.Solar(name, size, mass, powerlab, efficiency)

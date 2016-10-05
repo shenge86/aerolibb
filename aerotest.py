@@ -13,10 +13,20 @@ sc = spacecraft.Spacecraft("Juno", "Interplanetary")
 
 # propulsion test
 print("STARTING PROPULSION TEST")
-sc.engine1 = sc.create_engine("Engine1", "Mono", thrust=.889, isp=150, masse=500) 
-deltav, mi, mf, mp = sc.engine1.rocketeqn(mf=100, mi=1000)
-sc.engine1.mo = 100
-sc.engine1.printDesc()
+meng = 4.5 # engine mass
+# in later more detailed analysis, dry mass is added from other subsystems and iterated with propulsion subsystem mass
+mdry = meng + 500 # dry mass 
+sc.engine = sc.create_engine("Moog-ISP LEROS 1b", "Biprop", thrust=645, isp=318, me=meng) 
+deltav, mi, mf, mp = sc.engine.rocketeqn(mf=mdry, mi=mdry/.3)
+# sc.engine1.mo = 100
+mp, Vprop = sc.engine.calcpropsystemvol(B=4, rhop=992.15)
+mtank = sc.engine.tankvol2mass(Vprop, rho=5, n=2, t=.005, shape="cyl", L=5)
+
+sc.engine.printDesc()
+
+# http://www.rocket.com/article/aerojet-rocketdyne-propulsion-plays-critical-role-juno-mission-study-jupiter
+# http://www.astronautix.com/m/mr-111.html
+sc.enginercs = sc.create_engine("Aerojet Rocketdyne MR-111C", "Mono", thrust=4.5, isp=229, me=.35)
 
 print("Examine engine instances")
 # my_engines = []
