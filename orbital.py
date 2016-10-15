@@ -1,9 +1,10 @@
 import numpy as np
 
-global muE
+global muE, AU
 muE = 398600 # km3/s2
+AU = 1.49598 * 10 ** 8 # km
 
-# simple calculations
+# ALL CONIC SECTIONS
 def findea(v, r, gamma):
 	''' Define an orbit with known position, velocity, and flight path angle at a certain time.
 	Inputs:
@@ -14,42 +15,166 @@ def findea(v, r, gamma):
 		a (semimajor axis)
 		e (eccentricity)
 		theta (true anomaly in radians) (note: this  changes over time as object moves)
+		energy (energy of orbit)
+		H (angular momentum)
 	'''
 	energy = v ** 2 / 2 - muE / r 
-	if energy != 0:
+	print("Energy is " + str(energy))
+	if energy != 0: # if it is not a parabola
 		a = -muE / (2 * energy)
+		H = r * v * np.cos(gamma)
+		e = np.sqrt(1 - H ** 2 / (muE * a))
 	
-	H = r * v * np.cos(gamma)
-	e = np.sqrt(1 - H ** 2 / (muE * a))
+	print("a is " + str(a))
+	print("H is " + str(H))
+	print("e is " + str(e))
+	
 	
 	if e == 0:
 		theta = "Does not exist since it is a circle"
-	elif e < 0:
-		theta = np.acos(a * (1 - e ** 2) / (r * e) - (1/e))
-	elif e > 0:
-		theta = np.acos(a * (e ** 2 - 1) / (r * e) - (1/e))
-	else # parabola
-		rp = r # periapsis (NEED TO CORRECT!)
-		theta = np.acos((2 * rp - r) / (r * e))
+	elif e < 1:
+		print("Elliptical orbit")
+		theta = np.arccos(a * (1 - e ** 2) / (r * e) - (1/e))
+	elif e > 1:
+		print("Hyberpolic orbit")
+		theta = np.arccos(abs(a) * (e ** 2 - 1) / (r * e) - (1/e))
+		print("theta is: " + str(theta))
+	else: # parabola
+		print("Parabolic orbit")
+		a = "infinity"
+		e = 1
+		theta = np.arccos((2 * rp - r) / r)
 	
-	return a, e, theta
-	
+	return a, e, theta, energy, H
 
+def findrv(a, e, theta):
+	''' With a defined orbit of a and e, and knowing the true anomaly (theta), find certain parameters.
+	Inputs:
+		a (semimajor axis in m)
+		e (eccentricty)
+		theta (true anomaly in radians)
+	Outputs:
+		r (position in m)
+		v (velocity in m/s)
+		gamma (flight angle in radians)
+	'''
+	r = (a * (1 - e ** 2)) / (1 + e * np.cos(theta))
+	v = np.sqrt(2 * muE / r - muE / a)
+	
+	gamma = np.arctan2(e * np.sin(theta), 1 + e * np.cos(theta))
+	
+	return r, v, gamma
+
+	
+# ELLIPTICAL ORBITS ONLY
+def findtheta(rp, r, e):
+	'''True anomaly can be found from knowing periapsis, position, and eccentricity'''
+	theta = np.arccos(rp*(1+e)/(r*e) - 1/e)
+	return theta
+	
+def finderpra(rp, ra):
+	'''Elliptical orbits can be found from knowing periapsis and apoapsis'''
+	e = (ra - rp) / (ra + rp)
+	return e
+
+def finder1r2(r1, r2, theta1, theta2):
+	''' Ellpitical orbit can be found when given two points' positions'''
+	e = (r2 - r1) / (r1 * np.cos(theta1) - r2 * (np.cos(theta2)))
+	rp = r1 * (1 + e*np.cos(theta1)) / (1+e)
+	return e, rp
+	
 def eccentric2true(e, E):
-	'''From known eccentricity and eccentric anomaly, determine true anomaly
+	'''ELLPTICAL ORBITS
+	From known eccentricity and eccentric anomaly, determine true anomaly
 	Inputs:
 		e (eccentricity)
 		E (eccentric anomaly in radians)
 	Outputs:
 		theta (true anomaly in radians)
 	'''
-	if e < 1: # ellipse
-		theta = np.acos((np.cos(E) - e) / (1 - e * cosh(E)))
+	if e == 0: # circle (e=0) 
+		theta = "Undefined since it is a circle. Use argument of latitude (u) or true longitude (l) instead."
+		print(theta)
+	elif e < 1: # ellipse
+		print("Ellipse")
+		theta = np.arccos((np.cos(E) - e) / (1 - e * np.cosh(E)))
 	elif e > 1: # hyperbola
+		print("Hyperbola")
 		F = E # F is hyperbolic eccentric anomaly
-		theta = np.acosh((np.cosh(F)-e) / (1 - e * np.cosh(F))
+		theta = np.arccosh((np.cosh(F)-e) / (1 - e * np.cosh(F)))	
+	else: # parabola (e=1)
+		theta = "For parabola, true anomaly (radians) cannot be found from eccentric anomaly (E). Use findea(v, r, gamma) instead."
+		print(theta)
+		
+	return theta
+
+def tof_ellipse(a, e, theta):
+	''' ELLIPITICAL ORBITS ONLY
+	Time taken by spacecraft to move from periapsis to a given true anomaly (time since periapsis)
+	Also known as Kepler equation
+	Inputs:
+		a (semimajor axis)
+		e (eccentricity)
+		theta (true anomaly in radians)
+	Outputs:
+		n (mean motion in in radians / second)
+		P (orbital period)
+		E (eccentric anomaly in radians)
+		t (time since periapsis)
+	'''
+	n = np.sqrt(muE / a**3)
+	P = 2 * np.pi / n
+	E = np.arccos((e + np.cos(theta)) / (1 + e * np.cos(theta))) # E (eccentric anomaly)		
 	
-	return theta	
+	t = (E - e * np.sin(E)) / n
+	# if true anomaly is greater than half the orbit, must find time by subtracting from total period.
+	# This is because earlier formula only calculates journey in the shortest direction
+	if theta > np.pi/2:
+		t = P - t
 	
-def eccentricanomaly():
-	return 
+	return n, P, E, t
+	
+# def eccentricanomaly():
+#	return 
+	
+# PARABOLIC ORBITS ONLY
+def escapev(r):
+	'''PARABOLIC ORBITS ONLY
+	Find escape velocity knowing initial radius (distance from focus)
+	Inputs:
+		r (position)
+	Outputs:
+		v (escape velocity)
+	'''
+	vesc = np.sqrt(2 * muE / r)
+	return vesc
+	
+# HYPERBOLIC ORBITS ONLY
+def excessv(a):
+	'''HYERBOLIC ORBITS ONLY
+	Find velocity in excess of escape velocity
+	Inputs:
+		a (semimajor axis)
+	Outputs:
+		vinf (excess velocity)
+		C3
+	'''
+	vinf = np.sqrt(muE / abs(a))
+	C3 = vinf ** 2
+	return vinf, C3
+	
+def tof_hyperbola(a, e, theta):
+	'''HYPERBOLIC ORBITS ONLY
+	Inputs:
+		a (semimajor axis)
+		e (eccentricity)
+	Outputs:
+		n (mean motion in 1 / s)
+		F (hyperbolic eccentric anomaly in radians)
+		t (time since periapsis passage in s)
+	'''
+	n = np.sqrt(muE / a**3)
+	
+	F = np.cosh((e + np.cos(theta)) / (1 + e * np.cos(theta)))
+	t = (e * np.sinh(F) - F) / n
+	return n, F, t
