@@ -51,8 +51,11 @@ class Spacecraft:
 	def create_engine(self, name="Hydrazine Thruster", type="Mono", thrust=3000, isp=275, me=1000):
 		return prop.Engine(name, type, thrust, isp, me)
 		
-	def create_solar(self, name="Just Another Solar Panel", size=5000, mass=5, powerlab=300, efficiency=0.15):
-		return pow.Solar(name, size, mass, powerlab, efficiency)
+	def create_solar(self, name="Just Another Solar Panel", size=5000, density=5, powerlab=3000, efficiency=0.15):
+		return pow.Solar(name, size, density, powerlab, efficiency)
+	
+	def create_battery(self, name="Just Another Battery", size=100, capacity=300, efficiency=0.15):
+		return pow.Battery(name, size, capacity, efficiency)
 	
 	# Orbital Functions
 	def define_position(self, x, y, z, *rp):

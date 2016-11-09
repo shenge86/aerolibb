@@ -4,6 +4,9 @@ global muE, AU
 muE = 398600 # km3/s2
 AU = 1.49598 * 10 ** 8 # km
 
+# Please note:
+# 1. All angles are in radians.
+
 # ALL CONIC SECTIONS
 def findea(v, r, gamma):
 	''' Define an orbit with known position, velocity, and flight path angle at a certain time.
@@ -65,6 +68,16 @@ def findrv(a, e, theta):
 	
 	return r, v, gamma
 
+# CIRCULAR ORBIT ONLY
+def findv_circ(r):
+	''''Find circular orbit velocity.
+	Inputs:
+		r (radius)
+	Outputs:
+		v (velocity)
+	'''
+	v = np.sqrt(muE/r)
+	return v
 	
 # ELLIPTICAL ORBITS ONLY
 def findtheta(rp, r, e):
@@ -178,3 +191,9 @@ def tof_hyperbola(a, e, theta):
 	F = np.cosh((e + np.cos(theta)) / (1 + e * np.cos(theta)))
 	t = (e * np.sinh(F) - F) / n
 	return n, F, t
+	
+# ORBITAL TRANSFERS
+def mv_coplanar(vi, vf, alpha):
+	''' Changes initial orbit velocity vi to an intersecting coplanar orbit with velocity vf '''
+	deltav = np.sqrt(vi ** 2 + vf ** 2 - 2 * vi * vf * np.cos(alpha))
+	return deltav

@@ -91,5 +91,16 @@ n,F,t = orb.tof_hyperbola(a, e, theta)
 print(n)
 print(t)
 
+# 3.11
+print("3.11")
+print("Direct circular Earth orbit of radius 9100 km and a final coplanar elliptical orbit with e = 0.1, rp = 9000 km. What velocity change is needed?")
+
+
+
+
+deltav = orb.mv_coplanar(vi,vf,alpha)
+print(deltav)
+
+
 # Other
 theta = orb.eccentric2true(1,np.pi/2)

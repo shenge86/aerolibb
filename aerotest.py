@@ -5,11 +5,16 @@ import sys
 sys.path.insert(0, r"C:\Users\sheng\Dropbox\SG\Python\LIBRARIES\aerolibb") #the directory that contains my_pkg
 import numpy as np
 from aerolibb import framechange as fc
-from aerolibb import propulsion as engine
 from aerolibb import spacecraft
 
 # create spacecraft
 sc = spacecraft.Spacecraft("Juno", "Interplanetary")
+
+
+#power test
+print("START POWER TEST")
+sc.solarpanel = sc.create_solar("Solectra 1000", 200, 20, 30000, 0.95)
+sc.solarpanel.printDesc()
 
 # propulsion test
 print("STARTING PROPULSION TEST")
@@ -24,6 +29,7 @@ mtank = sc.engine.tankvol2mass(Vprop, rho=5, n=2, t=.005, shape="cyl", L=5)
 
 sc.engine.printDesc()
 
+# RCS thruster engines
 # http://www.rocket.com/article/aerojet-rocketdyne-propulsion-plays-critical-role-juno-mission-study-jupiter
 # http://www.astronautix.com/m/mr-111.html
 sc.enginercs = sc.create_engine("Aerojet Rocketdyne MR-111C", "Mono", thrust=4.5, isp=229, me=.35)
