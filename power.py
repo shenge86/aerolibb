@@ -76,8 +76,63 @@ def showSolarProducts():
 		return Solar(name,cellsize,density,specificpower,powerdensity,efficiency,EOL)
 
 class Power:
+	def __init__(self, powermax, poweravg, maxmass, maxsize, maxcost, missionlife, eclipsetime):
+		'''
+		Like other subsystems, power system requires fulfilling requirements and fall under constraints
+		Inputs initialized from other subystems
+		Outputs can affect other subsystems so iterate
+		INPUTS:
+		powermax (battery req) - watts
+		poweravg (solar panel req) - watts
+		eclipsetime (battery req) - minutes
+		'''
+		self.powermax = powermax
+		self.poweravg = poweravg
+		self.maxmass = maxmass
+		self.maxsize = maxsize
+		self.maxcost = maxcost
+		self.missionlife = missionlife
+		self.eclipsetime = eclipsetime		
+	
+	def calc_powersystem(self, powermax, poweravg, eclipsetime, DOD, Cbat, specificenergy):
+		'''
+		Calculates optimal numbers and configuration of power equipment
+		INPUTS:
+		DOD (depth of discharge - 0% to 100%)
+		Cbat (battery capacity - taken from battery object - Ah)
+		specificenergy (taken from battery object - Wh/kg)
+		'''
+		
+		# calculate for solar panels #
+		
+		
+	
+		# calculates for batteries #
+		# capacity requirements. Number of batteries must at least provide this capacity
+		bateta = 0.97 # bateta (battery-to-load efficiency) - 0% to 100%
+		systemvoltage = 28 # 28V is default for most spacecraft systems
+		Creq = powermax * (eclipsetime / 60) / (bateta * DOD*systemvoltage) # Ah
+		
+		# add one for redundancy
+		batterynums = np.ceil(Creq/Cbat) + 1
+		
+		# energy capacity of all batteries
+		Eb = batterynums * Cbat * systemvoltage # Wh
+		
+		# mass of batteries
+		batterymass = Eb / specificenergy
+		
+		# assign to the particular object
+		self.panelnums = panelnums 
+		self.panelmass = panelmass
+		self.batterynums = batterynums
+		self.batterymass = batterymass
+		return panelnums, panelmass, batterynums, batterymass
+
+	
+class PowerProducer:
 	def __init__(self, name, density, type):
-		''' Common to all energy producers:
+		''' Power producer types share these commonalities: 
 		name
 		density (kg/m2 for solar or kg/m3 for other)
 		type (solar, battery, fuel cell, etc.)
@@ -86,10 +141,12 @@ class Power:
 		self.density = density
 		self.type = type
 
+
+		
 # energy production devices		
-class Solar(Power):
+class Solar(PowerProducer):
 	def __init__(self, name, cellsize, density, specificpower, powerdensity, efficiency,EOL):
-		''' subclass of Power
+		''' subclass of PowerProducer
 		size (m2)
 		density (kg/m2)
 		specificpower (W/kg)
@@ -97,7 +154,7 @@ class Solar(Power):
 		efficiency (decimal between 0 and 1) '''
 		
 		# Initiate with 
-		Power.__init__(self, name, density, "Solar")
+		PowerProducer.__init__(self, name, density, "Solar")
 		
 		self.cellsize = cellsize
 		self.specificpower = specificpower
@@ -141,13 +198,23 @@ class Solar(Power):
 		print("Density (kg/m2): " + str(self.density))
 		print("Efficiency: " + str(self.efficiency))
 
+		
+		
 # energy storage devices		
-class Battery(Power):
+class PowerStorage():
+	def __init__(self,name,size,efficiency):
+		self.name = name
+		self.size = size
+		self.efficiency = efficiency
+		
+
+
+class Battery(PowerStorage):
 	def __init__(self, name, size, capacity, efficiency):
-		''' subclass of Power
+		''' subclass of PowerStorage
 		battery
 		'''
-		Power.__init__(self, name, size, capacity, "Battery")
+		PowerStorage.__init__(self, name, size, capacity, "Battery")
 		self.capacity = capacity
 		self.efficiency = efficiency
 		
@@ -156,21 +223,19 @@ class Battery(Power):
 		
 		self.capacity = capacity
 		return capacity
-
-
 		
-class FuelCell(Power):
+class FuelCell(PowerStorage):
 	def __init__(self, name, size, capacity, efficiency):
 		''' subclass of Power
 		fuel cells
 		'''
-		Power.__init__(self, name, size, capacity, "Fuel Cell")
+		PowerStorage.__init__(self, name, size, capacity, "Fuel Cell")
 		self.capacity = capacity
 		self.efficiency = efficiency
 		
-class FlyWheels(Power):
-	def __init__(self, name, size, capacity)
-		Power.__init__(self, name, size, capacity, "Flywheel")
+class FlyWheels(PowerStorage):
+	def __init__(self, name, size, capacity):
+		PowerStorage.__init__(self, name, size, capacity, "Flywheel")
 		
 		
 	
