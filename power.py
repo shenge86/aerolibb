@@ -76,16 +76,22 @@ def showSolarProducts():
 		return Solar(name,cellsize,density,specificpower,powerdensity,efficiency,EOL)
 
 class Power:
-	def __init__(self, powermax, poweravg, maxmass, maxsize, maxcost, missionlife, eclipsetime):
+	def __init__(self, powerpayload, maxmass, maxsize, maxcost, missionlife, eclipsetime):
 		'''
 		Like other subsystems, power system requires fulfilling requirements and fall under constraints
 		Inputs initialized from other subystems
 		Outputs can affect other subsystems so iterate
 		INPUTS:
-		powermax (battery req) - watts
-		poweravg (solar panel req) - watts
+		powerpayload - watts
 		eclipsetime (battery req) - minutes
+		OUTPUTS:
+		powermax (battery requirements) - watts
+		poweravg (solar panel requirements) - watts
 		'''
+		
+		# based on statistical fit of historical data
+		poweravg = 1.13 * powerpayload + 122 # watts
+		
 		self.powermax = powermax
 		self.poweravg = poweravg
 		self.maxmass = maxmass
@@ -94,19 +100,28 @@ class Power:
 		self.missionlife = missionlife
 		self.eclipsetime = eclipsetime		
 	
-	def calc_powersystem(self, powermax, poweravg, eclipsetime, DOD, Cbat, specificenergy):
+	def calc_powerproduction(self, poweravg):
 		'''
-		Calculates optimal numbers and configuration of power equipment
+		Calculates optimal numbers and configuration of batteries
+		'''
+		
+		self.panelnums = panelnums 
+		self.panelmass = panelmass
+		return panelnums, panelmass
+		
+	
+	def calc_powerstorage(self, powermax, poweravg, eclipsetime, DOD, Cbat, specificenergy):
+		'''
+		Calculates optimal numbers and configuration of batteries
 		INPUTS:
 		DOD (depth of discharge - 0% to 100%)
 		Cbat (battery capacity - taken from battery object - Ah)
 		specificenergy (taken from battery object - Wh/kg)
+		
+		# Another idea:
+		Have another method that calls this method. Loops through all available products
 		'''
 		
-		# calculate for solar panels #
-		
-		
-	
 		# calculates for batteries #
 		# capacity requirements. Number of batteries must at least provide this capacity
 		bateta = 0.97 # bateta (battery-to-load efficiency) - 0% to 100%
@@ -123,11 +138,10 @@ class Power:
 		batterymass = Eb / specificenergy
 		
 		# assign to the particular object
-		self.panelnums = panelnums 
-		self.panelmass = panelmass
+		
 		self.batterynums = batterynums
 		self.batterymass = batterymass
-		return panelnums, panelmass, batterynums, batterymass
+		return batterynums, batterymass
 
 	
 class PowerProducer:
@@ -202,10 +216,12 @@ class Solar(PowerProducer):
 		
 # energy storage devices		
 class PowerStorage():
-	def __init__(self,name,size,efficiency):
+	def __init__(self,name,size,efficiency,powermax, poweravg):
 		self.name = name
 		self.size = size
 		self.efficiency = efficiency
+		self.powermax = powermax
+		self.poweravg = poweravg
 		
 
 
@@ -217,7 +233,7 @@ class Battery(PowerStorage):
 		PowerStorage.__init__(self, name, size, capacity, "Battery")
 		self.capacity = capacity
 		self.efficiency = efficiency
-		
+			
 	def calc_capacity(self, size, efficiency):
 		capacity = size * efficiency
 		
@@ -233,6 +249,55 @@ class FuelCell(PowerStorage):
 		self.capacity = capacity
 		self.efficiency = efficiency
 		
+	def calc_density(self,td,T):
+		''' 
+		Calculates densities (W/kg,Whr/kg, W/L, Whr/L) for secondary fuel cells
+		Based on 2013 AIAA report written by Kenneth A. Burke of NASA Glenn Research Center
+		INPUTS:
+		td (dicharge time in hours)
+		T (temperature) - can be 200 K
+		OUTPUTS:
+		rhoP (power density in W/kg)
+		rhoE (energy density in Whr/kg)
+		gammaP (volume power density in W/L) 1 L = .001 m3
+		gammaE (volume energy  density in W*hr/L)
+		'''	
+		
+		# Change as appropriate
+		etae = .44 # efficiency
+		Vd = 1.68 # discharge / charge voltage (V)
+		Id = 1000 # discharge current density (mac/m2)
+		Am = 1540 # specific area (cm2/kg)
+		mu = 1800 # figure of merit proportion (atm-liter/kg)
+		R = .082 # atm-L/(g/mol * K)
+		PT = 70*9.86923 # maximum operating pressure of the tank (atm) - based on Toyota Mirai operating pressure
+		
+		rhoP = (3661*(td**-1)*etae*mu) / (3661*etae*mu*(Vd*Id*Am*td)**-1 + 83.3*R*T+ PT + mu)
+		rhoE = rhoP * td
+		
+		Av = 715 # cm2 / L
+		gammaP = 1 / ((td*R*T + .12*PT) / (43.93*etae*PT) + 1/(Vd*Id*Av))
+		gammaE = gammaP * td
+		return rhoP, rhoE, gammaP, gammaE
+	
+	def calc_sizemass(self,td,T):
+		'''
+		Calculates size and mass of secondary fuel cells
+		'''
+		
+		# calculates densities for secondary fuel cells
+		rhoP, rhoE, gammaP, gammaE = self.calc_density(self,td,T)
+		
+		# identify power requirements of the parent class
+		power = super(FuelCell,self).powermax
+		
+		size = power / gammaP
+		mass = power / rhoP 
+		
+		self.size = size
+		self.mass = mass
+		return size, mass
+	
 class FlyWheels(PowerStorage):
 	def __init__(self, name, size, capacity):
 		PowerStorage.__init__(self, name, size, capacity, "Flywheel")
