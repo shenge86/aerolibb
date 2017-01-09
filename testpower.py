@@ -6,12 +6,22 @@ sys.path.insert(0, r"C:\Users\sheng\Dropbox\SG\Python\LIBRARIES\aerolibb") #the 
 import numpy as np
 from aerolibb import power as pow
 
+# calculate power required
+pw = pow.Power(0,1000,5)
+power = pw.powermax
 
 # generate solar panel
 # solarpanel = pow.Solar(name, size, density, powerlab, efficiency)
 
-# Show list of solar products
+# solar panels
 solar1 = pow.showSolarProducts()
-power = 3000 # watts
 solar1.calc_size(power)
 solar1.printDesc()
+
+# batteries
+battery1 = pow.showBatteryProducts()
+h = 1000
+beta = 0
+eclipsetime = battery1.calc_eclipsetime(h,beta)
+battery1.calc_mass(power, eclipsetime)
+battery1.printDesc()
