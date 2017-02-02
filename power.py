@@ -122,13 +122,14 @@ def showBatteryProducts():
 		return Battery(name, DOD, Cbat, Whkg,WhL)
 		
 class Power:
-	def __init__(self, spin, powerpayload, missionlife):
+	def __init__(self, spin, poweravg, missionlife):
 		'''
 		Like other subsystems, power system requires fulfilling requirements and fall under constraints
 		Inputs initialized from other subystems
 		Outputs can affect other subsystems so iterate
+		Note: power input is taken from the initially generated spacecraft
 		INPUTS:
-		powerpayload - watts
+		poweravg - watts (total power) 
 		missionlife  - years
 		OUTPUTS:
 		powermax (battery requirements) - watts
@@ -138,12 +139,6 @@ class Power:
 		# Some important notes:
 		# 1. Power budget is based on peak power demands.
 		# 2. Energy budget is based on average energy consumption.
-		
-		# based on statistical fit of historical data
-		poweravg = 1.13 * powerpayload + 122 # watts
-		# add in margins
-		# power margins can be as high as 90% for a new design spacecraft
-		poweravg = poweravg * 1.5
 		
 		# powermax is equivalent to night time power
 		# at night, thermal control power is approximately doubled
@@ -173,19 +168,18 @@ class Power:
 		powermax = powermax / eta
 		
 		#inputs object set
-		self.powerpayload = powerpayload
+		self.poweravg = poweravg
 		self.missionlife = missionlife	
 		
 		# outputs object set
 		self.powermax = powermax
-		self.poweravg = poweravg
+		
 		
 	
 	def calc_powerproduction(self, poweravg):
 		'''
 		Calculates optimal numbers and configuration of batteries
 		'''
-		
 		self.panelnums = panelnums 
 		self.panelmass = panelmass
 		return panelnums, panelmass
