@@ -1,3 +1,3 @@
-id,name,cellsize (m2),density (kg/m2),specificpower (W/kg),powerdensity (W/m2),efficiency,EOL / BOL ratio
-1,SolAero ZTJ Solar Cell,0.0073,0.84,1610.71,1353,0.92,0.96
-2,SolAero ZTJM Solar Cell,0.0073,0.84,1610.71,1353,0.92,0.96
+id	name	cellsize (m2)	density (kg/m2)	specificpower (W/kg)	powerdensity (W/m2)	efficiency	EOL / BOL ratio
+1	SolAero ZTJ Solar Cell	0.0073	0.84	1610.71	1353	0.92	0.96
+2	SolAero ZTJM Solar Cell	0.0073	0.84	1610.71	1353	0.92	0.96

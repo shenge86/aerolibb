@@ -1,0 +1,10 @@
+id,name,type,isp (s),thrust (N),mass (kg)
+1,Aestus,bipropellant,324,30000,111
+2,AestusII,bipropellant,340,55400,138
+3,S139,bipropellant,264,4860000,160200
+4,Merlin1D,bipropellant,311,723000,470
+5,Merlin1DFT,bipropellant,311,914000,470
+6,Merlin1C,bipropellant,304,480408,630
+7,Rutherford,bipropellant,327,22000,
+8,BE-3,bipropellant,,490000,
+9,NSTAR,ion,3100,0.092,8.2
