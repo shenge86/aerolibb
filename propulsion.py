@@ -89,7 +89,7 @@ class Engine(object):
 				Biprop or 2 (bipropellant)
 				Coldgas or 3 (cold gas)
 				Solid or 4 (solid)
-				Ion or 5 (electrostatic thruster)
+				Ion or 5 (ion thruster)
 				Hall or 6 (hall thruster)
 				MPD or 7 (magnetoplasmadynamic thruster)
 				SEP or 8 (solar electric)
@@ -171,7 +171,15 @@ class Engine(object):
 			print("mf (final mass): " + str(mf))
 			print("mp (propellant mass): " + str(mp))
 
+		if (self.type=="ion"):
+			print("Electric propulsion assuming continuous thrust...")
+		elif (self.type=="bipropellant"):
+			print("Chemical propulsion assuming impulsive maneuvers...")
+
+		# following only applies for impulsive propulsion with rocket-like engines
+		# notably does not apply to solar sails or electric propulsion
 		# deltav and initial mass given
+		print("Starting calculations: ")
 		if "deltav" in kwargs and "mi" in kwargs:
 			print("Given deltav: " + str(kwargs["deltav"]))
 			deltav = float(kwargs['deltav'])
@@ -186,7 +194,7 @@ class Engine(object):
 			# return values (most of the time unneeded)
 			return deltav, mi, mf, mp
 
-		# deltav and final mass given
+		# deltav and final mass (non-propellant) given
 		if "deltav" in kwargs and "mf" in kwargs:
 			deltav = float(kwargs["deltav"])
 			mf = float(kwargs["mf"])

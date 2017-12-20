@@ -6,19 +6,40 @@ sys.path.insert(0, r"C:\Users\sheng\Dropbox\SG\Python\LIBRARIES\aerolibb") #the 
 import numpy as np
 from aerolibb import power as pow
 from aerolibb import propulsion as prop
+from aerolibb import orbital as orb
 
 # generate propulsion
 (ids,names,types,isps,thrusts,masses) = prop.showEngines()
 engine1 = prop.chooseEngines(ids,names,types,isps,thrusts,masses)
 
-deltav = 11e3 # km/s
-mi = 1000 # kg
 
-kwargs = {'deltav':'11e3','mi':'1000'}
+print("USER INPUTS")
+# default parameters if nothing is given
+deltai = 30 # inclination change (degrees)
+deltai = np.deg2rad(deltai)
+v0 = 7.726e3
+vf = 3.075e3
+mpayload = 1000 # kg
+mf = engine1.me + mpayload # kg
+
+# deltai = input("Input inclination change: ")
+# v0 = input("Input initial velocity: ")
+# vf = input("Input final velocity: ")
+# mpayload = input("Input payload mass: ")
+
+beta0 = orb.mv_coplanar(v0,vf,deltai)
+print(beta0)
+
+if (engine1.type == "ion"):
+    (deltav, t) = orb.deltav_lowthrust(beta0,v0,deltai,engine1.thrust)
+else:
+    deltav = orb.deltav_coplanar(v0,vf,deltai)
+
+kwargs = {'deltav': deltav,'mf': mf}
 
 engine1.rocketeqn(**kwargs)
 
-engine1.printDesc()
+# engine1.printDesc()
 
 
 
