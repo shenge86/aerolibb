@@ -1,6 +1,8 @@
+import sys
 import numpy as np
 import os
 import csv
+from aerolibb import orbital as orb
 
 # Assumed known from outside of this file:
 # deltav
@@ -21,6 +23,8 @@ def showEngines():
 		isps = []
 		thrusts = []
 		masses = []
+		subtypes = []
+		propellants = []
 
 		# loop through each row of the table
 		for row in readCSV:
@@ -30,6 +34,8 @@ def showEngines():
 			isp = row[3]
 			thrust = row[4]
 			mass = row[5]
+			subtype = row[6]
+			propellant = row[7]
 
 			print(id + ": " + name)
 
@@ -40,11 +46,13 @@ def showEngines():
 			isps.append(isp)
 			thrusts.append(thrust)
 			masses.append(mass)
+			subtypes.append(subtype)
+			propellants.append(propellant)
 
-	return (ids,names,types,isps,thrusts,masses);
+	return (ids,names,types,isps,thrusts,masses,subtypes,propellants);
 
 # create an engine with user inputted parameters
-def chooseEngines(ids,names,types,isps,thrusts,masses):
+def chooseEngines(ids,names,types,isps,thrusts,masses, subtypes, propellants):
 	whatEngine = input('What engine do you want? Enter ID #: ')
 	idex = ids.index(whatEngine)
 
@@ -54,6 +62,8 @@ def chooseEngines(ids,names,types,isps,thrusts,masses):
 	isp = isps[idex]
 	thrust = thrusts[idex]
 	mass = masses[idex]
+	subtype = subtypes[idex]
+	propellant = propellants[idex]
 
 	# display for user info
 	print("You selected ")
@@ -62,13 +72,15 @@ def chooseEngines(ids,names,types,isps,thrusts,masses):
 	print("isp (s): " + isp)
 	print("Thrust (N): " + thrust)
 	print("Mass (kg):" + mass)
+	print("Subtype: " + subtype)
+	print("Propellant: " + propellant)
 
 	# convert the string types  to float  types
 	isp = float(isp)
 	thrust = float(thrust)
 	mass = float(mass)
 
-	return Engine(name, type, isp, thrust, mass)
+	return Engine(name,type,isp,thrust,mass,subtype,propellant)
 
 class Engine(object):
 	# Constants
@@ -78,7 +90,7 @@ class Engine(object):
 	global flag
 	flag = 1 # rocket equation has not been initialized yet (mass of propellant, structural mass, and total mass are set as default)
 
-	def __init__(self, name, type, isp, thrust, me):
+	def __init__(self, name, type, isp, thrust, me, subtype, propellant):
 		''' Defines major characteristics of an engine
 		Type of engine affects major design calculations.
 		Specifics such as the type of chemicals do not need to be defined.
@@ -103,9 +115,27 @@ class Engine(object):
 		self.thrust = thrust
 		self.isp = isp
 		self.me = me
+		self.subtype = subtype
+		self.propellant = propellant
 
-		# default defined mp until further notcie:
-		self.mp = 5000 # kg
+		# calculate propellant flow rate
+		ve = isp * g # m/s (exhaust velocity)
+		self.ve = ve
+		self.mdot = thrust / ve # kg/s (mass flow rate)
+
+		# if electric engine then find required electric power
+		# note alpha can vary greatly. 100 is just a WAG.
+		# etat varies between 40% to 80%
+		if (type=="electric"):
+			self.etat = 0.5 # thruster efficiency
+			self.pe = self.mdot*(self.ve**2)/(2*self.etat) # Watts
+			self.alpha = 100 # W / kg (specific power)
+			self.me = self.pe / self.alpha + self.me # kg (total mass including power plant mass)
+		else:
+			self.pe = 5 # Watts
+
+		# default defined masses until further notcie:
+		self.mp = 5000 # kg (propellant mass)
 		self.mo = 1000 # kg
 		self.mass = self.me + self.mp + self.mo
 
@@ -124,16 +154,20 @@ class Engine(object):
 		print("Type: " + self.type)
 		print("isp: " + str(self.isp))
 		print("Thrust: " + str(self.thrust))
-		print("Mass of engine: " + str(self.me))
+		print("Mass flow rate: " + str(self.mdot))
+		print("Exhaust velocity: " + str(self.ve))
+		print("Power requirements: " + str(self.pe))
 
 		if flag==1:
 			print("WARNING: All propellant, other propulsion parts, and total subsystem mass are set as default. Please run rocket equation to get real numbers.")
 
+		print("Mass of engine: " + str(self.me))
 		print("Mass of propellant: " + str(self.mp))
 		print("Mass of other propulsion parts: " + str(self.mo))
 
 		self.mass = self.me + self.mp + self.mo
 		print("Mass of propulsion subsystem (total): " + str(self.mass))
+
 
 	# orbital mechanics
 	# use for main engine
@@ -156,8 +190,7 @@ class Engine(object):
 		isp = self.isp # s
 		flag = 0 # this function has ran!
 
-
-
+		# set the engine characteristics based on user inputs
 		def selfset(self):
 			# Define a set of masses for the propulsion system
 			self.deltav = deltav # deltav
@@ -171,7 +204,7 @@ class Engine(object):
 			print("mf (final mass): " + str(mf))
 			print("mp (propellant mass): " + str(mp))
 
-		if (self.type=="ion"):
+		if (self.type=="electric"):
 			print("Electric propulsion assuming continuous thrust...")
 		elif (self.type=="bipropellant"):
 			print("Chemical propulsion assuming impulsive maneuvers...")
@@ -181,7 +214,7 @@ class Engine(object):
 		# deltav and initial mass given
 		print("Starting calculations: ")
 		if "deltav" in kwargs and "mi" in kwargs:
-			print("Given deltav: " + str(kwargs["deltav"]))
+			print("Given deltav: " + str(kwargs["deltav"]) + " m/s")
 			deltav = float(kwargs['deltav'])
 			mi = float(kwargs['mi'])
 
@@ -205,8 +238,8 @@ class Engine(object):
 
 		# initial mass and final mass given
 		if "mi" in kwargs and "mf" in kwargs:
-			print("Given mi: " + kwargs["mi"])
-			print("Given mf: " + kwargs["mf"])
+			print("Given mi: " + kwargs["mi"] + " kg")
+			print("Given mf: " + kwargs["mf"] + " kg")
 			mi = float(kwargs["mi"])
 			mf = float(kwargs["mf"])
 			deltav = g * isp * np.log(mi / mf)

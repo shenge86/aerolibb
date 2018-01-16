@@ -9,8 +9,8 @@ from aerolibb import propulsion as prop
 from aerolibb import orbital as orb
 
 # generate propulsion
-(ids,names,types,isps,thrusts,masses) = prop.showEngines()
-engine1 = prop.chooseEngines(ids,names,types,isps,thrusts,masses)
+(ids,names,types,isps,thrusts,masses,subtypes,propellants) = prop.showEngines()
+engine1 = prop.chooseEngines(ids,names,types,isps,thrusts,masses,subtypes,propellants)
 
 
 print("USER INPUTS")
@@ -30,16 +30,19 @@ mf = engine1.me + mpayload # kg
 beta0 = orb.mv_coplanar(v0,vf,deltai)
 print(beta0)
 
-if (engine1.type == "ion"):
+# ion thrusters use continuous thrust maneuvers
+if (engine1.type == "electric"):
     (deltav, t) = orb.deltav_lowthrust(beta0,v0,deltai,engine1.thrust)
+    print("Delta v is " + str(deltav) + " m/s")
 else:
     deltav = orb.deltav_coplanar(v0,vf,deltai)
+    print("Delta v is " + str(deltav) + " m/s")
 
 kwargs = {'deltav': deltav,'mf': mf}
 
 engine1.rocketeqn(**kwargs)
 
-# engine1.printDesc()
+engine1.printDesc()
 
 
 
