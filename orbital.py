@@ -1,9 +1,10 @@
 import numpy as np
+from aerolibb import myconstants
 
 # astrodynamics constants
 global muE, AU
-muE = 398600 # km3/s2
-AU = 1.49598 * 10 ** 8 # km
+muE = myconstants.muE
+AU = myconstants.AU
 
 # Please note:
 # 1. All angles are in radians.
@@ -194,6 +195,18 @@ def tof_hyperbola(a, e, theta):
 	return n, F, t
 
 # ORBITAL TRANSFERS
+# in-plane maneuvers
+def deltav_hohmann(r1, r2):
+	'''
+	Hohmann transfer for a spacecraft to go from radius 1 to radius 2
+	'''
+	deltav1 = findv_circ(r1)*(np.sqrt(2*r2/(r1+r2))-1)
+	deltav2 = findv_circ(r2)*(1-np.sqrt(2*r1/(r1+r2)))
+	deltav = deltav1 + deltav2
+	t = np.pi * np.sqrt((r1+r2)**3/(8*myconstants.muE))
+	return (deltav, t)
+
+# plane change manuevers
 def mv_coplanar(v0, vf, deltai):
 	''' Changes initial orbit velocity vi to an intersecting coplanar orbit with velocity vf
 	beta0 is the initial thrust vector yaw angle, Δi, is the total inclination change
@@ -216,3 +229,7 @@ def deltav_coplanar(v0,vf,deltai):
 	'''
 	deltav = np.sqrt(v0 ** 2 + vf ** 2 - 2 * v0 * vf * np.cos(deltai))
 	return deltav
+
+def test():
+	print("Testing")
+	return
