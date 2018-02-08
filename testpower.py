@@ -13,13 +13,16 @@ from aerolibb import myconstants
 (ids,names,types,isps,thrusts,masses,subtypes,propellants) = prop.showEngines()
 engine1 = prop.chooseEngines(ids,names,types,isps,thrusts,masses,subtypes,propellants)
 
-
-# Orbital mechanics part
+print("===========")
+print("USER INPUTS")
+print("===========")
 h = 200 # km (altitude)
 r1 = myconstants.rE
-r2 = myconstants.rE + h
-# Rocket part
-print("USER INPUTS")
+r2 = (myconstants.rE + h)
+
+print("Initial orbital radius: " + str(r1) + " km")
+print("Final orbital radius: " + str(r2) + " km \n")
+
 # default parameters if nothing is given
 deltai = 0 # inclination change (degrees)
 deltai = np.deg2rad(deltai)
@@ -33,7 +36,7 @@ mf = engine1.me + mpayload # kg
 # vf = input("Input final velocity: ")
 # mpayload = input("Input payload mass: ")
 
-
+print("ORBITAL MECHANICS CALCULATIONS")
 if (engine1.type == "electric"):
     # ion thrusters use continuous thrust maneuvers
     (deltav, t) = orb.deltav_lowthrust(beta0,v0,deltai,engine1.thrust)
@@ -42,19 +45,22 @@ if (engine1.type == "electric"):
 else:
     print("Assume impulsive maneuver: ")
     (deltav,t) = orb.deltav_hohmann(r1,r2)
-    deltav = deltav*1000
+    deltav = deltav
     # deltav = orb.deltav_coplanar(v0,vf,deltai) + deltav
     print("Delta v is " + str(deltav) + " m/s")
 
 # beta0 = orb.mv_coplanar(v0,vf,deltai)
 # print(beta0)
-
+print("\nPROPULSION CALCULATIONS")
 kwargs = {'deltav': deltav,'mf': mf}
 
 engine1.rocketeqn(**kwargs)
 
 engine1.printDesc()
 
+print("=================")
+print("OTHER INFORMATION")
+print("=================")
 # calculate ratios
 # An optimal rocket maximizes piratio
 # Also, lower epsratio is good

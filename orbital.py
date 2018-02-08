@@ -74,11 +74,12 @@ def findrv(a, e, theta):
 def findv_circ(r):
 	''''Find circular orbit velocity.
 	Inputs:
-		r (radius)
+		r (radius in kilometers)
 	Outputs:
-		v (velocity)
+		v (velocity in kilometers)
 	'''
 	v = np.sqrt(muE/r)
+	print(v)
 	return v
 
 # ELLIPTICAL ORBITS ONLY
@@ -200,8 +201,18 @@ def deltav_hohmann(r1, r2):
 	'''
 	Hohmann transfer for a spacecraft to go from radius 1 to radius 2
 	'''
-	deltav1 = findv_circ(r1)*(np.sqrt(2*r2/(r1+r2))-1)
-	deltav2 = findv_circ(r2)*(1-np.sqrt(2*r1/(r1+r2)))
+	aT = (r1+r2)/2
+
+	vinitial = np.sqrt(muE/r1)
+	vtransferi = np.sqrt(muE*(2/r1 - 1/aT))
+	deltav1 =  vtransferi - vinitial
+
+	vfinal = np.sqrt(muE/r2)
+	vtransferf = np.sqrt(muE*(2/r2 - 1/aT))
+
+	deltav2 = vfinal - vtransferf
+	print(deltav1)
+	print(deltav2)
 	deltav = deltav1 + deltav2
 	t = np.pi * np.sqrt((r1+r2)**3/(8*myconstants.muE))
 	return (deltav, t)
