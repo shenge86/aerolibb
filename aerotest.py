@@ -8,7 +8,7 @@ from aerolibb import framechange as fc
 from aerolibb import spacecraft
 
 # create spacecraft
-sc = spacecraft.Spacecraft("Juno", "Interplanetary")
+sc = spacecraft.Spacecraft("Juno", "Interplanetary",9)
 
 
 #power test

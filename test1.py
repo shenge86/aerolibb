@@ -8,6 +8,10 @@ R0 = 6378.14 # km
 e = 0 # circular orbit
 theta = 30 # true anomaly (doesn't matter for circle since velocity is same throughout!)
 
+# 1.0 find period of Earth orbit at geosynchronous orbit
+
+
+
 r, v, gamma = orb.findrv(R0, e, theta)
 print(v)
 
