@@ -1,5 +1,5 @@
 import numpy as np
-from aerolibb import myconstants
+from data import myconstants
 
 # astrodynamics constants
 global muE, AU
