@@ -1,0 +1,6 @@
+[project]
+name = "aerolibb"
+version = "0.1.0"
+description = "Aerospace mission planning library"
+requires-python = ">=3.12"
+
